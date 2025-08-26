@@ -1,0 +1,8 @@
+requests
+pandas
+streamlit
+gspread
+oauth2client
+toml
+altair
+streamlit_authenticator
