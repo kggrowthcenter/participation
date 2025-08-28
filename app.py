@@ -259,34 +259,33 @@ if st.session_state['authentication_status']:
             indicator=True
         )
     
-        # Convert tanggal submit
+        # Convert tanggal submit kalau ada
         if "submitted_on" in df_merged.columns:
             df_merged['submitted_on'] = pd.to_datetime(df_merged['submitted_on'], errors='coerce')
     
         with st.expander('Survey Respondent & SAP Sheet Merged'):
             st.dataframe(df_merged)
     
+        # --- Buat concise dataframe ---
+        df_concise = pd.DataFrame({
+            'nik': df_merged['nik_short'].combine_first(df_merged.get('nik_x')),
+            'name': df_merged.get('name_sap', pd.Series()).combine_first(df_merged.get('name')),
+            'unit': df_merged.get('unit_long', pd.Series()).combine_first(df_merged.get('unit_name')),
+            'subunit': df_merged.get('subunit', pd.Series()).combine_first(df_merged.get('unit_name')),
+            'division': df_merged.get('division', pd.Series()).combine_first(df_merged.get('div_name')),
+            'department': df_merged.get('department', pd.Series()).combine_first(df_merged.get('dept_name')),
+            'position': df_merged.get('position', pd.Series()).combine_first(df_merged.get('position_name')),
+            'status_survey': df_merged['_merge'].apply(lambda x: 'done' if x in ['left_only', 'both'] else 'not done'),
+            'admin_goman': df_merged.apply(lambda row: row['admin_goman'] if pd.notna(row.get('admin_goman')) else '-', axis=1),
+            'submitted_on': df_merged['submitted_on'].dt.date if 'submitted_on' in df_merged else pd.NaT
+        })
+    
+        with st.expander("Concise Survey Data"):
+            st.dataframe(df_concise)
+    
     else:
         st.info("ℹ️ Survey belum dimulai, data responden masih kosong. Belum bisa digabung dengan SAP.")
 
-
-
-
-    # CONCISE DATAFRAME SECTION
-
-    # Create the new concise DataFrame
-    df_concise = pd.DataFrame({
-        'nik': df_merged['nik_short'].combine_first(df_merged['nik_x']),
-        'name' : df_merged['name_sap'].combine_first(df_merged['name']),
-        'unit': df_merged['unit_long'].combine_first(df_merged['unit_name']),
-        'subunit' : df_merged['subunit'].combine_first(df_merged['unit_name']),  # Fill empty subunit with unit
-        'division': df_merged['division'].combine_first(df_merged['div_name']),
-        'department': df_merged['department'].combine_first(df_merged['dept_name']),
-        'position': df_merged['position'].combine_first(df_merged['position_name']),
-        'status_survey': df_merged['_merge'].apply(lambda x: 'done' if x in ['left_only', 'both'] else 'not done'),
-        'admin_goman': df_merged.apply(lambda row: row['admin_goman'] if pd.notna(row['admin_goman']) else '-', axis=1),
-        'submitted_on':df_merged['submitted_on'].dt.date
-    })
 
     # Drop rows where the unit is 'KOMPAS GRAMEDIA'
     df_concise = df_concise.loc[df_concise['unit'] != 'KOMPAS GRAMEDIA'].reset_index(drop=True)
