@@ -242,21 +242,33 @@ if st.session_state['authentication_status']:
     with st.expander('Survey'):
         st.dataframe(survey_respondent_data)
 
-    # JOIN SURVER RESPONDENT AND SHEET SAP SECTION
+    # --- JOIN SURVEY RESPONDENT AND SHEET SAP SECTION ---
+    
+    if not survey_respondent_data.empty and "nik" in survey_respondent_data.columns:
+        # Pastikan nik 6 digit
+        survey_respondent_data['nik'] = survey_respondent_data['nik'].astype(str).str.zfill(6)
+        df_sap['nik_short'] = df_sap['nik_short'].astype(str).str.zfill(6)
+    
+        # Merge dengan SAP
+        df_merged = pd.merge(
+            survey_respondent_data,
+            df_sap,
+            left_on='nik',
+            right_on='nik_short',
+            how='outer',
+            indicator=True
+        )
+    
+        # Convert tanggal submit
+        if "submitted_on" in df_merged.columns:
+            df_merged['submitted_on'] = pd.to_datetime(df_merged['submitted_on'], errors='coerce')
+    
+        with st.expander('Survey Respondent & SAP Sheet Merged'):
+            st.dataframe(df_merged)
+    
+    else:
+        st.info("ℹ️ Survey belum dimulai, data responden masih kosong. Belum bisa digabung dengan SAP.")
 
-    # Convert 'nik' column to string and ensure it is 6 digits starting with "00"
-    survey_respondent_data['nik'] = survey_respondent_data['nik'].astype(str).str.zfill(6)
-    df_sap['nik_short'] = df_sap['nik_short'].astype(str).str.zfill(6)
-
-    # Now perform the merge
-    df_merged = pd.merge(survey_respondent_data, df_sap, left_on='nik', right_on='nik_short', how='outer', indicator=True)
-
-    # Convert submitted_on as datetime
-    df_merged['submitted_on'] = pd.to_datetime(df_merged['submitted_on'], errors='coerce')
-
-    # Display df_merged
-    with st.expander('Survey Respondent & SAP Sheet Merged'):
-        st.dataframe(df_merged)
 
 
 
