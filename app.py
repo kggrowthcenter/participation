@@ -161,25 +161,28 @@ if st.session_state['authentication_status']:
         # --- Range survey: 1-30 Sept 2025 ---
         survey_start = datetime(2025, 9, 1, 0, 0)
         survey_end   = datetime(2025, 9, 30, 23, 59)
-
+    
+        # Handle kalau belum mulai
         if end_date < survey_start:
             st.warning("⏳ Survey belum dimulai (mulai 1 September 2025).")
-            return pd.DataFrame()
-        elif start_date > survey_end:
+            return pd.DataFrame(columns=["nik", "name", "unit_name", "div_name", "dept_name", "position_name", "submitted_on"])
+    
+        # Handle kalau sudah berakhir
+        if start_date > survey_end:
             st.warning("✅ Survey sudah berakhir (sampai 30 September 2025).")
-            return pd.DataFrame()
-
+            return pd.DataFrame(columns=["nik", "name", "unit_name", "div_name", "dept_name", "position_name", "submitted_on"])
+    
         all_data = []
         current_date = start_date
-        total_days = (end_date - start_date).days
-
+        total_days = max((end_date - start_date).days, 1)
+    
         # Progress bar
         progress_bar = st.progress(0)
         status_text = st.empty()
-
+    
         while current_date < end_date:
             next_date = (current_date + timedelta(days=1)).replace(hour=0, minute=0)
-
+    
             # Update progress
             progress = min(((current_date - start_date).days + 1) / total_days, 1.0)
             progress_bar.progress(progress)
@@ -187,35 +190,44 @@ if st.session_state['authentication_status']:
                 f"Fetching data {current_date.strftime('%Y-%m-%d')} "
                 f"s/d {next_date.strftime('%Y-%m-%d')}"
             )
-
+    
             daily_data = fetch_data(current_date, next_date, surresp_url)
             if daily_data is not None and not daily_data.empty:
                 all_data.append(daily_data)
-
+    
             current_date = next_date
-
+    
         # Bersihin progress
         progress_bar.empty()
         status_text.empty()
-
-        if all_data:
-            combined_data = pd.concat(all_data, ignore_index=True)
-
-            if 'name' in combined_data.columns:
-                combined_data = combined_data[combined_data['name'] != 'Testing aja']
-            else:
-                st.warning("⚠️ Kolom 'name' tidak ada di survey respondent, skip filter Testing aja.")
-
-            return combined_data
-        else:
+    
+        # Kalau gak ada data sama sekali
+        if not all_data:
             st.info("ℹ️ Tidak ada data responden di periode ini.")
-            return pd.DataFrame()
-
-
+            return pd.DataFrame(columns=["nik", "name", "unit_name", "div_name", "dept_name", "position_name", "submitted_on"])
+    
+        # Gabungkan semua
+        combined_data = pd.concat(all_data, ignore_index=True)
+    
+        # Bersihin data testing
+        if "name" in combined_data.columns:
+            combined_data = combined_data[combined_data["name"] != "Testing aja"]
+        else:
+            st.warning("⚠️ Kolom 'name' tidak ada di survey respondent, skip filter Testing aja.")
+    
+        # Tambahkan kolom wajib kalau hilang
+        required_cols = ["nik", "name", "unit_name", "div_name", "dept_name", "position_name", "submitted_on"]
+        for col in required_cols:
+            if col not in combined_data.columns:
+                combined_data[col] = pd.NA
+    
+        return combined_data
+    
+    
     # --- Panggil fungsi ---
     start_date = datetime(2025, 9, 1, 0, 0)
     end_date   = datetime(2025, 9, 30, 23, 59)
-
+    
     survey_respondent_data = fetch_survey_respondent_data(start_date, end_date)
 
     # CONNECT SHEET SAP SECTION
@@ -244,47 +256,33 @@ if st.session_state['authentication_status']:
 
     # --- JOIN SURVEY RESPONDENT AND SHEET SAP SECTION ---
     
-    if not survey_respondent_data.empty and "nik" in survey_respondent_data.columns:
-        # Pastikan nik 6 digit
-        survey_respondent_data['nik'] = survey_respondent_data['nik'].astype(str).str.zfill(6)
-        df_sap['nik_short'] = df_sap['nik_short'].astype(str).str.zfill(6)
+    # Convert 'nik' column to string and ensure it is 6 digits starting with "00"
+    survey_respondent_data['nik'] = survey_respondent_data['nik'].astype(str).str.zfill(6)
+    df_sap['nik_short'] = df_sap['nik_short'].astype(str).str.zfill(6)
+
+    # Now perform the merge
+    df_merged = pd.merge(survey_respondent_data, df_sap, left_on='nik', right_on='nik_short', how='outer', indicator=True)
+
+    # Convert submitted_on as datetime
+    df_merged['submitted_on'] = pd.to_datetime(df_merged['submitted_on'], errors='coerce')
+
+    # Display df_merged
+    with st.expander('Survey Respondent & SAP Sheet Merged'):
+        st.dataframe(df_merged)
     
-        # Merge dengan SAP
-        df_merged = pd.merge(
-            survey_respondent_data,
-            df_sap,
-            left_on='nik',
-            right_on='nik_short',
-            how='outer',
-            indicator=True
-        )
-    
-        # Convert tanggal submit kalau ada
-        if "submitted_on" in df_merged.columns:
-            df_merged['submitted_on'] = pd.to_datetime(df_merged['submitted_on'], errors='coerce')
-    
-        with st.expander('Survey Respondent & SAP Sheet Merged'):
-            st.dataframe(df_merged)
-    
-        # --- Buat concise dataframe ---
-        df_concise = pd.DataFrame({
-            'nik': df_merged['nik_short'].combine_first(df_merged.get('nik_x')),
-            'name': df_merged.get('name_sap', pd.Series()).combine_first(df_merged.get('name')),
-            'unit': df_merged.get('unit_long', pd.Series()).combine_first(df_merged.get('unit_name')),
-            'subunit': df_merged.get('subunit', pd.Series()).combine_first(df_merged.get('unit_name')),
-            'division': df_merged.get('division', pd.Series()).combine_first(df_merged.get('div_name')),
-            'department': df_merged.get('department', pd.Series()).combine_first(df_merged.get('dept_name')),
-            'position': df_merged.get('position', pd.Series()).combine_first(df_merged.get('position_name')),
-            'status_survey': df_merged['_merge'].apply(lambda x: 'done' if x in ['left_only', 'both'] else 'not done'),
-            'admin_goman': df_merged.apply(lambda row: row['admin_goman'] if pd.notna(row.get('admin_goman')) else '-', axis=1),
-            'submitted_on': df_merged['submitted_on'].dt.date if 'submitted_on' in df_merged else pd.NaT
-        })
-    
-        with st.expander("Concise Survey Data"):
-            st.dataframe(df_concise)
-    
-    else:
-        st.info("ℹ️ Survey belum dimulai, data responden masih kosong. Belum bisa digabung dengan SAP.")
+    # Create the new concise DataFrame
+    df_concise = pd.DataFrame({
+        'nik': df_merged['nik_short'].combine_first(df_merged['nik_x']),
+        'name' : df_merged['name_sap'].combine_first(df_merged['name']),
+        'unit': df_merged['unit_long'].combine_first(df_merged['unit_name']),
+        'subunit' : df_merged['subunit'].combine_first(df_merged['unit_name']),  # Fill empty subunit with unit
+        'division': df_merged['division'].combine_first(df_merged['div_name']),
+        'department': df_merged['department'].combine_first(df_merged['dept_name']),
+        'position': df_merged['position'].combine_first(df_merged['position_name']),
+        'status_survey': df_merged['_merge'].apply(lambda x: 'done' if x in ['left_only', 'both'] else 'not done'),
+        'admin_goman': df_merged.apply(lambda row: row['admin_goman'] if pd.notna(row['admin_goman']) else '-', axis=1),
+        'submitted_on':df_merged['submitted_on'].dt.date
+    })
 
 
     # Drop rows where the unit is 'KOMPAS GRAMEDIA'
