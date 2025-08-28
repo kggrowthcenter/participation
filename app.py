@@ -188,11 +188,7 @@ if st.session_state['authentication_status']:
 
         if all_data:
             combined_data = pd.concat(all_data, ignore_index=True)
-            if 'name' in combined_data.columns:
-                combined_data = combined_data[combined_data['name'] != 'Testing aja']
-            else:
-                st.warning("Kolom 'name' tidak ada di survey respondent, skip filter Testing aja")
-
+            combined_data = combined_data[combined_data['name'] != 'Testing aja']
             return combined_data
         else:
             st.info("No data available for the specified date range.")
