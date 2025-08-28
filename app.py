@@ -209,7 +209,7 @@ if st.session_state['authentication_status']:
         #end_date   = datetime(2024, 10, 31, 23, 59)  
 
     start_date = datetime.strptime("2025-09-01 00:00", "%Y-%m-%d %H:%M")
-    end_date = datetime.strptime("2025-09-31 23:59", "%Y-%m-%d %H:%M")
+    end_date = datetime.strptime("2025-09-30 23:59", "%Y-%m-%d %H:%M")
     # Fetch the Survey Respondent Data (24-hour interval)
     survey_respondent_data = fetch_survey_respondent_data(start_date, end_date)
 
