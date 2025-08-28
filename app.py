@@ -158,55 +158,64 @@ if st.session_state['authentication_status']:
     # Function to handle fetching Survey Respondent Data (24-hour intervals)
     @st.cache_data(ttl=7200)
     def fetch_survey_respondent_data(start_date, end_date):
+        # --- Range survey: 1-30 Sept 2025 ---
+        survey_start = datetime(2025, 9, 1, 0, 0)
+        survey_end   = datetime(2025, 9, 30, 23, 59)
+
+        if end_date < survey_start:
+            st.warning("⏳ Survey belum dimulai (mulai 1 September 2025).")
+            return pd.DataFrame()
+        elif start_date > survey_end:
+            st.warning("✅ Survey sudah berakhir (sampai 30 September 2025).")
+            return pd.DataFrame()
+
         all_data = []
         current_date = start_date
         total_days = (end_date - start_date).days
 
-        # Initialize progress bar and status text
+        # Progress bar
         progress_bar = st.progress(0)
         status_text = st.empty()
 
         while current_date < end_date:
             next_date = (current_date + timedelta(days=1)).replace(hour=0, minute=0)
-            
-            # Update progress and status text
+
+            # Update progress
             progress = min(((current_date - start_date).days + 1) / total_days, 1.0)
             progress_bar.progress(progress)
-            status_text.write(f"Fetching data for {current_date.strftime('%Y-%m-%d')} to {next_date.strftime('%Y-%m-%d')}")
+            status_text.write(
+                f"Fetching data {current_date.strftime('%Y-%m-%d')} "
+                f"s/d {next_date.strftime('%Y-%m-%d')}"
+            )
 
-            # Fetch data for the current date range
             daily_data = fetch_data(current_date, next_date, surresp_url)
-
-            if daily_data is not None:
+            if daily_data is not None and not daily_data.empty:
                 all_data.append(daily_data)
 
             current_date = next_date
 
-        # Clear the status once fetching is done
+        # Bersihin progress
         progress_bar.empty()
         status_text.empty()
 
         if all_data:
             combined_data = pd.concat(all_data, ignore_index=True)
-            combined_data = combined_data[combined_data['name'] != 'Testing aja']
+
+            if 'name' in combined_data.columns:
+                combined_data = combined_data[combined_data['name'] != 'Testing aja']
+            else:
+                st.warning("⚠️ Kolom 'name' tidak ada di survey respondent, skip filter Testing aja.")
+
             return combined_data
         else:
-            st.info("No data available for the specified date range.")
+            st.info("ℹ️ Tidak ada data responden di periode ini.")
             return pd.DataFrame()
 
-    # Pilih tahun survey
-    #survey_year = st.sidebar.selectbox("Pilih Tahun Survey", ["2025", "2024"])
 
-    #if survey_year == "2025":
-        #start_date = datetime(2025, 9, 1, 0, 0)
-        #end_date   = datetime(2025, 9, 31, 23, 59)  
-    #elif survey_year == "2024":
-        #start_date = datetime(2024, 10, 1, 0, 0)
-        #end_date   = datetime(2024, 10, 31, 23, 59)  
+    # --- Panggil fungsi ---
+    start_date = datetime(2025, 9, 1, 0, 0)
+    end_date   = datetime(2025, 9, 30, 23, 59)
 
-    start_date = datetime.strptime("2025-09-01 00:00", "%Y-%m-%d %H:%M")
-    end_date = datetime.strptime("2025-09-30 23:59", "%Y-%m-%d %H:%M")
-    # Fetch the Survey Respondent Data (24-hour interval)
     survey_respondent_data = fetch_survey_respondent_data(start_date, end_date)
 
     # CONNECT SHEET SAP SECTION
