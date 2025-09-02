@@ -249,10 +249,10 @@ if st.session_state['authentication_status']:
     df_sap = fetch_data_sap()
 
     # Display data from sap
-    with st.expander('Employee Data from SAP Sheet'):
-        st.dataframe(df_sap)
-    with st.expander('Survey'):
-        st.dataframe(survey_respondent_data)
+    #with st.expander('Employee Data from SAP Sheet'):
+        #st.dataframe(df_sap)
+    #with st.expander('Survey'):
+        #st.dataframe(survey_respondent_data)
 
     # --- JOIN SURVEY RESPONDENT AND SHEET SAP SECTION ---
     
@@ -267,8 +267,8 @@ if st.session_state['authentication_status']:
     df_merged['submitted_on'] = pd.to_datetime(df_merged['submitted_on'], errors='coerce')
 
     # Display df_merged
-    with st.expander('Survey Respondent & SAP Sheet Merged'):
-        st.dataframe(df_merged)
+    #with st.expander('Survey Respondent & SAP Sheet Merged'):
+        #st.dataframe(df_merged)
     
     # Create the new concise DataFrame
     df_concise = pd.DataFrame({
@@ -331,8 +331,8 @@ if st.session_state['authentication_status']:
     df_concise['department'] = df_concise['department'].str.upper().str.strip()
 
     #Display df_concise
-    with st.expander('df_concise'):
-        st.dataframe(df_concise)
+    #with st.expander('df_concise'):
+        #st.dataframe(df_concise)
 
     # FILTER SECTION
 
