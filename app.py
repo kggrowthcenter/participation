@@ -298,6 +298,9 @@ if st.session_state['authentication_status']:
     def extract_main_unit(text):
         if pd.isna(text):
             return text
+
+        # Convert non-string values to string
+        text = str(text).strip()
         
         # Uppercase
         text = text.upper()
