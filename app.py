@@ -249,10 +249,10 @@ if st.session_state['authentication_status']:
     df_sap = fetch_data_sap()
 
     # Display data from sap
-    with st.expander('Employee Data from SAP Sheet'):
-        st.dataframe(df_sap)
-    with st.expander('Survey'):
-        st.dataframe(survey_respondent_data)
+    #with st.expander('Employee Data from SAP Sheet'):
+        #st.dataframe(df_sap)
+    #with st.expander('Survey'):
+        #st.dataframe(survey_respondent_data)
 
     # --- JOIN SURVEY RESPONDENT AND SHEET SAP SECTION ---
     
