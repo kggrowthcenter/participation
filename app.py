@@ -279,6 +279,7 @@ if st.session_state['authentication_status']:
         'division': df_merged['division'].combine_first(df_merged['div_name']),
         'department': df_merged['department'].combine_first(df_merged['dept_name']),
         'position': df_merged['position'].combine_first(df_merged['position_name']),
+        'phone_format': df_merged['phone_format'],
         'status_survey': df_merged['_merge'].apply(lambda x: 'done' if x in ['left_only', 'both'] else 'not done'),
         'admin_goman': df_merged.apply(lambda row: row['admin_goman'] if pd.notna(row['admin_goman']) else '-', axis=1),
         'submitted_on':df_merged['submitted_on'].dt.date
