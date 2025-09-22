@@ -274,7 +274,7 @@ if st.session_state['authentication_status']:
     df_concise = pd.DataFrame({
         'nik': df_merged['nik_short'].combine_first(df_merged['nik_x']),
         'name' : df_merged['name_sap'].combine_first(df_merged['name']),
-        'unit': df_merged['unit_long'].combine_first(df_merged['unit_name']),
+        'unit': df_merged['unit_name'].combine_first(df_merged['unit_long']),
         'subunit' : df_merged['subunit'].combine_first(df_merged['unit_name']),  # Fill empty subunit with unit
         'division': df_merged['division'].combine_first(df_merged['div_name']),
         'department': df_merged['department'].combine_first(df_merged['dept_name']),
