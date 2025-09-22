@@ -299,20 +299,30 @@ if st.session_state['authentication_status']:
     def extract_main_unit(text):
         if pd.isna(text):
             return text
-    
-        text = str(text).strip().upper()
+
+        # Convert non-string values to string
+        text = str(text).strip()
+        
+        # Uppercase
+        text = text.upper()
+        
+        # Ganti delimiter jadi satu (misalnya '/')
         text = re.sub(r'[-]', '/', text)
+        
+        # Replace phrases
         text = re.sub(r'\s*GROUP OF\s*', 'G. ', text)
         text = re.sub(r'\s*CORPORATE\s*', 'C. ', text)
         text = re.sub(r'KOMPAS GRAMEDIA', '', text)
-    
+        
+        # Pecah berdasarkan '/'
         parts = [p.strip() for p in text.split('/') if p.strip()]
-    
+        
+        # Cari yang dimulai "G." atau "C."
         for p in parts:
             if p.startswith("G.") or p.startswith("C."):
-                # ambil kata setelah G. / C.
-                return p.replace("G.", "").replace("C.", "").strip().split()[0]
-    
+                return p.strip()
+        
+        # fallback: kalau ga ada "G." atau "C.", ambil bagian pertama setelah buang KG
         return parts[0] if parts else None
 
 
