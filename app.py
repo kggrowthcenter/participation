@@ -310,9 +310,9 @@ if st.session_state['authentication_status']:
         text = re.sub(r'[-]', '/', text)
         
         # Replace phrases
-        text = re.sub(r'\s*GROUP OF\s*', 'G. ', text)
-        text = re.sub(r'\s*CORPORATE\s*', 'C. ', text)
-        text = re.sub(r'KOMPAS GRAMEDIA', '', text)
+        text = re.sub(r'GROUP\s+OF', 'G.', text, flags=re.IGNORECASE)
+        text = re.sub(r'CORPORATE', 'C.', text, flags=re.IGNORECASE)
+        text = re.sub(r'KOMPAS GRAMEDIA', '', text, flags=re.IGNORECASE)
         
         # Pecah berdasarkan '/'
         parts = [p.strip() for p in text.split('/') if p.strip()]
