@@ -328,6 +328,15 @@ if st.session_state['authentication_status']:
 
     # Terapkan ke dataframe
     df_concise['unit'] = df_concise['unit'].apply(extract_main_unit)
+    rename_units = {
+        "G. DYANDRA MEDIA INTERNATIONAL": "DYANDRA",
+        "G. HOTELS & RESORTS": "GOHR",
+        "G. RETAIL & PUBLISHING": "GORP",
+        "G. MANUFACTURE" : "GOMAN"
+    }
+
+    # Replace pakai mapping
+    df_concise['unit'] = df_concise['unit'].replace(rename_units)
     df_concise['subunit'] = df_concise['subunit'].apply(extract_main_unit)
 
 
