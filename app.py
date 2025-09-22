@@ -328,6 +328,19 @@ if st.session_state['authentication_status']:
 
     # Terapkan ke dataframe
     df_concise['unit'] = df_concise['unit'].apply(extract_main_unit)
+    # Normalisasi: strip spasi, uppercase, hapus titik dobel
+    df_concise['unit'] = df_concise['unit'].str.upper().str.strip().str.replace(r'\s+', ' ', regex=True)
+    
+    # Mapping rename
+    rename_units = {
+        "G. DYANDRA MEDIA INTERNATIONAL": "DYANDRA",
+        "DYANDRA MEDIA INTERNATIONAL": "DYANDRA",
+        "G. HOTELS & RESORTS": "GOHR",
+        "HOTELS & RESORTS": "GOHR",
+        "G. RETAIL & PUBLISHING": "GORP",
+        "RETAIL & PUBLISHING": "GORP",
+    }
+    df_concise['unit'] = df_concise['unit'].replace(rename_units)
     df_concise['subunit'] = df_concise['subunit'].apply(extract_main_unit)
 
 
