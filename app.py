@@ -375,7 +375,7 @@ if st.session_state['authentication_status']:
             df_concise = df_concise[df_concise['unit'].isin(selected_unit)]
 
     # If 'G. MANUFACTURE' is in the selected units, show additional filter for 'Admin GOMAN'
-    if 'G. MANUFACTURE' in selected_unit:
+    if 'GOMAN' in selected_unit:
         admin_goman_list = ['All'] + list(df_concise['admin_goman'].unique())
         selected_admin_goman = st.sidebar.multiselect('Select Admin GOMAN:', admin_goman_list)
 
@@ -384,7 +384,7 @@ if st.session_state['authentication_status']:
             df_concise = df_concise[df_concise['admin_goman'].isin(selected_admin_goman)]
 
     # If 'G. MEDIA' is in the selected units, show additional filter for 'Admin GOMAN'
-    if 'G. MEDIA' in selected_unit:
+    if 'KG MEDIA' in selected_unit:
         subunit_list = ['All'] + list(df_concise['subunit'].unique())
         selected_subunit = st.sidebar.multiselect('Select Subunit GOMED:', subunit_list)
 
