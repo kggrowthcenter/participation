@@ -288,6 +288,7 @@ if st.session_state['authentication_status']:
 
     # Drop rows where the unit is 'KOMPAS GRAMEDIA'
     df_concise = df_concise.loc[df_concise['unit'] != 'KOMPAS GRAMEDIA'].reset_index(drop=True)
+    df_concise = df_concise.loc[df_concise['unit'] != 'KG'].reset_index(drop=True)
 
     # Drop rows where the position is 'Store Apprentice'
     df_concise = df_concise.loc[df_concise['position'] != 'Store Apprentice'].reset_index(drop=True)
