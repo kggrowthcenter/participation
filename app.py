@@ -386,7 +386,7 @@ if st.session_state['authentication_status']:
     # If 'G. MEDIA' is in the selected units, show additional filter for 'Admin GOMAN'
     if 'KG MEDIA' in selected_unit:
         subunit_list = ['All'] + list(df_concise['subunit'].unique())
-        selected_subunit = st.sidebar.multiselect('Select Subunit GOMED:', subunit_list)
+        selected_subunit = st.sidebar.multiselect('Select Subunit KG MEDIA:', subunit_list)
 
         # Filter the DataFrame based on the selected 'Subunit GOMED'
         if selected_subunit:
