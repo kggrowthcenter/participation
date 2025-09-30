@@ -160,7 +160,7 @@ if st.session_state['authentication_status']:
     def fetch_survey_respondent_data(start_date, end_date):
         # --- Range survey: 1-30 Sept 2025 ---
         survey_start = datetime(2025, 9, 1, 0, 0)
-        survey_end   = datetime(2025, 9, 30, 23, 59)
+        survey_end   = datetime(2025, 10, 10, 23, 59)
     
         # Handle kalau belum mulai
         if end_date < survey_start:
