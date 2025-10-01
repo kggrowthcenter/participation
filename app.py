@@ -226,7 +226,7 @@ if st.session_state['authentication_status']:
     
     # --- Panggil fungsi ---
     start_date = datetime(2025, 9, 1, 0, 0)
-    end_date   = datetime(2025, 9, 30, 23, 59)
+    end_date   = datetime(2025, 10, 10, 23, 59)
     
     survey_respondent_data = fetch_survey_respondent_data(start_date, end_date)
 
