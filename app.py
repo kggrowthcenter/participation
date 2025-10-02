@@ -343,7 +343,8 @@ if st.session_state['authentication_status']:
         "G. RETAIL & PUBLISHING": "GORP",
         "RETAIL & PUBLISHING": "GORP",
         "G. MANUFACTURE" : "GOMAN",
-        "G. MEDIA" : "KG MEDIA"
+        "G. MEDIA" : "KG MEDIA",
+        "C. IT & IS" : "CITIS"
     }
     df_concise['unit'] = df_concise['unit'].replace(rename_units)
     df_concise['subunit'] = df_concise['subunit'].apply(extract_main_unit)
