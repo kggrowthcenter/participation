@@ -290,6 +290,8 @@ if st.session_state['authentication_status']:
     df_concise = df_concise.loc[df_concise['unit'] != 'KOMPAS GRAMEDIA'].reset_index(drop=True)
     df_concise = df_concise.loc[df_concise['unit'] != 'KG'].reset_index(drop=True)
 
+    df_concise = df_concise.loc[df_concise['nik'] != '012172'].reset_index(drop=True)
+
     # Drop rows where the position is 'Store Apprentice'
     df_concise = df_concise.loc[df_concise['position'] != 'Store Apprentice'].reset_index(drop=True)
     df_concise.loc[df_concise['nik'] == '088367', 'unit'] = 'G. DYANDRA MEDIA INTERNATIONAL'
